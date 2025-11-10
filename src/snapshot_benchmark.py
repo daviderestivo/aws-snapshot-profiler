@@ -59,16 +59,19 @@ def get_instance_metadata():
 
     return instance_id, volume_id
 
-def create_snapshot_and_measure(volume_id, snapshot_num):
+def create_snapshot_and_measure(volume_id, snapshot_num, filename):
     """Create snapshot and measure time"""
     ec2 = boto3.client('ec2')
+    
+    # Extract filename without path and extension for snapshot name
+    snapshot_name = os.path.basename(filename).replace('.dat', '')
 
     print(f"Starting snapshot {snapshot_num}...")
     start_time = time.time()
 
     response = ec2.create_snapshot(
         VolumeId=volume_id,
-        Description=f'Benchmark snapshot {snapshot_num}'
+        Description=f'{snapshot_name} - Benchmark snapshot {snapshot_num}'
     )
     snapshot_id = response['SnapshotId']
 
@@ -90,7 +93,7 @@ def create_snapshot_and_measure(volume_id, snapshot_num):
     except Exception as e:
         print(f"Warning: Could not enable fast snapshot restore: {e}")
 
-    print(f"Snapshot {snapshot_id} completed in {elapsed_time:.2f} seconds")
+    print(f"Snapshot {snapshot_id} ({snapshot_name}) completed in {elapsed_time:.2f} seconds")
     return snapshot_id, elapsed_time
 
 def record_to_csv(snapshot_num, elapsed_time, csv_filename):
@@ -170,7 +173,7 @@ def main():
             filename = create_random_file(args.size)
 
             # Step 2 & 3: Create snapshot and measure time
-            snapshot_id, elapsed_time = create_snapshot_and_measure(volume_id, snapshot_num)
+            snapshot_id, elapsed_time = create_snapshot_and_measure(volume_id, snapshot_num, filename)
 
             # Step 4: Record to CSV
             record_to_csv(snapshot_num, elapsed_time, args.output)
