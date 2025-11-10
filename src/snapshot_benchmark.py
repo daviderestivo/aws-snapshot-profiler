@@ -28,14 +28,29 @@ def get_instance_metadata():
     """Get current instance and volume info"""
     ec2 = boto3.client('ec2')
 
-    # Get instance ID from metadata
+    # Get instance ID from metadata (try IMDSv2 first, then IMDSv1)
     try:
-        result = subprocess.run(['curl', '-s', '--connect-timeout', '5', 'http://169.254.169.254/latest/meta-data/instance-id'], 
-                              capture_output=True, text=True, check=True)
+        # Try IMDSv2
+        token_result = subprocess.run(['curl', '-X', 'PUT', '-H', 'X-aws-ec2-metadata-token-ttl-seconds: 21600', 
+                                     'http://169.254.169.254/latest/api/token'], 
+                                    capture_output=True, text=True, timeout=5)
+        if token_result.returncode == 0 and token_result.stdout.strip():
+            token = token_result.stdout.strip()
+            result = subprocess.run(['curl', '-H', f'X-aws-ec2-metadata-token: {token}', 
+                                   'http://169.254.169.254/latest/meta-data/instance-id'], 
+                                  capture_output=True, text=True, timeout=5)
+        else:
+            # Fallback to IMDSv1
+            result = subprocess.run(['curl', '-s', '--connect-timeout', '5', 
+                                   'http://169.254.169.254/latest/meta-data/instance-id'], 
+                                  capture_output=True, text=True, timeout=5)
+        
+        if result.returncode != 0 or not result.stdout.strip():
+            raise Exception("Failed to retrieve instance ID from metadata service")
+        
         instance_id = result.stdout.strip()
-        if not instance_id:
-            raise Exception("Empty instance ID returned")
-    except (subprocess.CalledProcessError, Exception) as e:
+        
+    except Exception as e:
         raise Exception(f"Failed to get instance metadata. Ensure script runs on EC2 instance: {e}")
 
     # Get root volume ID
