@@ -61,6 +61,9 @@ Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
   # Custom file size (20GB)
   python3 snapshot_benchmark.py -s 20
 
+  # Custom directory for .dat files
+  python3 snapshot_benchmark.py -d /home/ec2-user/data
+
   # Multiple snapshots with custom size and filename
   python3 snapshot_benchmark.py -n 3 -s 5 -o benchmark_data.csv
 
@@ -74,6 +77,7 @@ Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
 ** Command Line Options
 - ~-n, --num-snapshots~: Number of snapshots to create (default: 1)
 - ~-s, --size~: File size in GB (default: 10)
+- ~-d, --directory~: Directory for .dat files (default: /tmp)
 - ~-o, --output~: Output CSV filename (default: snapshot_results.csv)
 - ~-a, --ami-csv~: AMI creation CSV filename (default: ami_results.csv)
 
@@ -100,7 +104,7 @@ ami-0123456789abcdef0,180.45
 * Process Flow
 
 1. For each snapshot iteration:
-   - Creates ~/tmp/aws-snapshot-profiler-{random}.dat~ with specified size
+   - Creates ~{directory}/aws-snapshot-profiler-{random}.dat~ with specified size
    - Detects current instance and root volume
    - Creates EBS snapshot and measures time
    - Records timing to CSV

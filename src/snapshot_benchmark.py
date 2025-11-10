@@ -13,10 +13,10 @@ warnings.filterwarnings("ignore", category=DeprecationWarning, module="boto3")
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="botocore")
 warnings.filterwarnings("ignore", message=".*Boto3 will no longer support Python.*")
 
-def create_random_file(size_gb):
+def create_random_file(size_gb, directory="/tmp"):
     """Create file with random content and random name"""
     random_num = random.randint(10000, 99999)
-    filename = f"/tmp/aws-snapshot-profiler-{random_num}.dat"
+    filename = f"{directory}/aws-snapshot-profiler-{random_num}.dat"
     size_mb = size_gb * 1024
 
     print(f"Creating {size_gb}GB random file: {filename}")
@@ -222,6 +222,7 @@ def main():
     parser.add_argument('-n', '--num-snapshots', type=int, default=1, help='Number of snapshots to create (default: 1)')
     parser.add_argument('-o', '--output', default='snapshot_results.csv', help='Output CSV filename (default: snapshot_results.csv)')
     parser.add_argument('-s', '--size', type=int, default=10, help='File size in GB (default: 10)')
+    parser.add_argument('-d', '--directory', default='/tmp', help='Directory for .dat files (default: /tmp)')
     parser.add_argument('-a', '--ami-csv', default='ami_results.csv', help='AMI creation CSV filename (default: ami_results.csv)')
     args = parser.parse_args()
 
@@ -236,7 +237,7 @@ def main():
         # Create snapshots in loop
         for snapshot_num in range(1, args.num_snapshots + 1):
             # Step 1: Create random file for each snapshot
-            filename = create_random_file(args.size)
+            filename = create_random_file(args.size, args.directory)
 
             # Step 2 & 3: Create snapshot and measure time
             snapshot_id, elapsed_time = create_snapshot_and_measure(volume_id, snapshot_num, filename)
