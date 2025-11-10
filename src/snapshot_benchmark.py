@@ -134,7 +134,18 @@ def create_ami_and_measure(snapshot_id, snapshot_name):
                 'SnapshotId': snapshot_id,
                 'VolumeType': 'gp3'
             }
-        }]
+        }],
+        TagSpecifications=[
+            {
+                'ResourceType': 'image',
+                'Tags': [
+                    {
+                        'Key': 'Name',
+                        'Value': f'{snapshot_name}-ami-{int(time.time())}'
+                    }
+                ]
+            }
+        ]
     )
     
     ami_id = ami_response['ImageId']
