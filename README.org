@@ -107,17 +107,6 @@ ami-0123456789abcdef0,180.45
 2. After all snapshots, creates AMI from the last snapshot in the same region
 3. Measures AMI creation time and records to separate CSV file
 
-* Required Permissions
-
-The IAM policy grants:
-- ~ec2:CreateSnapshot~
-- ~ec2:CreateTags~
-- ~ec2:DescribeSnapshots~
-- ~ec2:DescribeInstances~
-- ~ec2:DescribeVolumes~
-- ~ec2:RegisterImage~
-- ~ec2:DescribeImages~
-
 * Troubleshooting
 
 ** Permission Errors
