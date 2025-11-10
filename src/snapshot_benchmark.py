@@ -31,25 +31,25 @@ def get_instance_metadata():
     # Get instance ID from metadata (try IMDSv2 first, then IMDSv1)
     try:
         # Try IMDSv2
-        token_result = subprocess.run(['curl', '-X', 'PUT', '-H', 'X-aws-ec2-metadata-token-ttl-seconds: 21600', 
-                                     'http://169.254.169.254/latest/api/token'], 
+        token_result = subprocess.run(['curl', '-X', 'PUT', '-H', 'X-aws-ec2-metadata-token-ttl-seconds: 21600',
+                                     'http://169.254.169.254/latest/api/token'],
                                     capture_output=True, text=True, timeout=5)
         if token_result.returncode == 0 and token_result.stdout.strip():
             token = token_result.stdout.strip()
-            result = subprocess.run(['curl', '-H', f'X-aws-ec2-metadata-token: {token}', 
-                                   'http://169.254.169.254/latest/meta-data/instance-id'], 
+            result = subprocess.run(['curl', '-H', f'X-aws-ec2-metadata-token: {token}',
+                                   'http://169.254.169.254/latest/meta-data/instance-id'],
                                   capture_output=True, text=True, timeout=5)
         else:
             # Fallback to IMDSv1
-            result = subprocess.run(['curl', '-s', '--connect-timeout', '5', 
-                                   'http://169.254.169.254/latest/meta-data/instance-id'], 
+            result = subprocess.run(['curl', '-s', '--connect-timeout', '5',
+                                   'http://169.254.169.254/latest/meta-data/instance-id'],
                                   capture_output=True, text=True, timeout=5)
-        
+
         if result.returncode != 0 or not result.stdout.strip():
             raise Exception("Failed to retrieve instance ID from metadata service")
-        
+
         instance_id = result.stdout.strip()
-        
+
     except Exception as e:
         raise Exception(f"Failed to get instance metadata. Ensure script runs on EC2 instance: {e}")
 
@@ -78,6 +78,17 @@ def create_snapshot_and_measure(volume_id, snapshot_num):
 
     end_time = time.time()
     elapsed_time = end_time - start_time
+
+    # Enable fast snapshot restore
+    try:
+        current_region = boto3.Session().region_name
+        ec2.enable_fast_snapshot_restores(
+            AvailabilityZones=[f"{current_region}a"],
+            SourceSnapshotIds=[snapshot_id]
+        )
+        print(f"Fast snapshot restore enabled for {snapshot_id}")
+    except Exception as e:
+        print(f"Warning: Could not enable fast snapshot restore: {e}")
 
     print(f"Snapshot {snapshot_id} completed in {elapsed_time:.2f} seconds")
     return snapshot_id, elapsed_time
