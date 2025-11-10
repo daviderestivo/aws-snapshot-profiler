@@ -71,7 +71,18 @@ def create_snapshot_and_measure(volume_id, snapshot_num, filename):
 
     response = ec2.create_snapshot(
         VolumeId=volume_id,
-        Description=f'{snapshot_name} - Benchmark snapshot {snapshot_num}'
+        Description=f'{snapshot_name} - Benchmark snapshot {snapshot_num}',
+        TagSpecifications=[
+            {
+                'ResourceType': 'snapshot',
+                'Tags': [
+                    {
+                        'Key': 'Name',
+                        'Value': f'{snapshot_name} - Benchmark snapshot {snapshot_num}'
+                    }
+                ]
+            }
+        ]
     )
     snapshot_id = response['SnapshotId']
 

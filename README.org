@@ -111,6 +111,7 @@ ami-0123456789abcdef0,180.45
 
 The IAM policy grants:
 - ~ec2:CreateSnapshot~
+- ~ec2:CreateTags~
 - ~ec2:DescribeSnapshots~
 - ~ec2:DescribeInstances~
 - ~ec2:DescribeVolumes~
