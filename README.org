@@ -38,6 +38,8 @@ chmod +x setup_iam.sh
 ./setup_iam.sh
 #+END_SRC
 
+*Warning:* The included IAM policy (~iam_policy.json~) grants broad EC2 permissions (~ec2:*~) and is intended for testing purposes only. For production use, create a more restrictive policy with only the minimum required permissions.
+
 ** 4. Attach Instance Profile
 Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
 - EC2 → Instances → Select Instance → Actions → Security → Modify IAM Role
