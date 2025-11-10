@@ -5,8 +5,8 @@
 * Purpose
 
 This tool benchmarks AWS EBS snapshot creation performance by:
-- Creating a 10GB random file to simulate disk activity
-- Measuring snapshot creation time
+- Creating random files of configurable size to simulate disk activity
+- Measuring snapshot creation time for multiple snapshots
 - Recording results to CSV
 - Copying snapshots across regions and creating AMIs
 
@@ -27,7 +27,8 @@ cd aws-snapshot-profiler
 
 ** 2. Install Dependencies
 #+BEGIN_SRC bash
-pip3 install boto3
+  dnf -y install pip git
+  pip3 install boto3
 #+END_SRC
 
 ** 3. Setup IAM Permissions
@@ -47,12 +48,30 @@ Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
 ** Run Benchmark
 #+BEGIN_SRC bash
 cd src
+# Basic usage (1 snapshot, 10GB file, default CSV name)
 python3 snapshot_benchmark.py
+
+# Create multiple snapshots
+python3 snapshot_benchmark.py -n 5
+
+# Custom file size (20GB)
+python3 snapshot_benchmark.py -s 20
+
+# Multiple snapshots with custom size and filename
+python3 snapshot_benchmark.py -n 3 -s 5 -o benchmark_data.csv
+
+# Show help
+python3 snapshot_benchmark.py -h
 #+END_SRC
+
+** Command Line Options
+- ~-n, --num-snapshots~: Number of snapshots to create (default: 1)
+- ~-s, --size~: File size in GB (default: 10)
+- ~-o, --output~: Output CSV filename (default: snapshot_results.csv)
 
 ** Output
 - Console progress updates
-- ~snapshot_results.csv~ with timing data
+- CSV file with timing data
 - Snapshot ID and AMI ID upon completion
 
 ** CSV Format
@@ -63,12 +82,13 @@ snapshot_number,elapsed_time
 
 * Process Flow
 
-1. Creates ~/tmp/test_file.dat~ (10GB random data)
-2. Detects current instance and root volume
-3. Creates EBS snapshot and measures time
-4. Records timing to CSV
-5. Copies snapshot to different region
-6. Creates AMI from copied snapshot
+1. For each snapshot iteration:
+   - Creates ~/tmp/aws-snapshot-profiler-{random}.dat~ with specified size
+   - Detects current instance and root volume
+   - Creates EBS snapshot and measures time
+   - Records timing to CSV
+2. After all snapshots, copies final snapshot to different region
+3. Creates AMI from copied snapshot
 
 * Required Permissions
 
