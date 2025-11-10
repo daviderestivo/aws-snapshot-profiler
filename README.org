@@ -8,7 +8,7 @@ This tool benchmarks AWS EBS snapshot creation performance by:
 - Creating random files of configurable size to simulate disk activity
 - Measuring snapshot creation time for multiple snapshots
 - Recording results to CSV
-- Copying snapshots across regions and creating AMIs
+- Creating AMI from the last snapshot in the same region with timing measurements
 
 * Prerequisites
 
@@ -62,6 +62,9 @@ Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
   # Multiple snapshots with custom size and filename
   python3 snapshot_benchmark.py -n 3 -s 5 -o benchmark_data.csv
 
+  # Custom AMI timing CSV filename
+  python3 snapshot_benchmark.py -a ami_timing.csv
+
   # Show help
   python3 snapshot_benchmark.py -h
 #+END_SRC
@@ -70,16 +73,26 @@ Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
 - ~-n, --num-snapshots~: Number of snapshots to create (default: 1)
 - ~-s, --size~: File size in GB (default: 10)
 - ~-o, --output~: Output CSV filename (default: snapshot_results.csv)
+- ~-a, --ami-csv~: AMI creation CSV filename (default: ami_results.csv)
 
 ** Output
 - Console progress updates
-- CSV file with timing data
+- CSV file with snapshot timing data
+- Separate CSV file with AMI creation timing data
 - Snapshot ID and AMI ID upon completion
 
 ** CSV Format
+
+*** Snapshot Results CSV
 #+BEGIN_EXAMPLE
 snapshot_number,elapsed_time
 1,245.67
+#+END_EXAMPLE
+
+*** AMI Results CSV
+#+BEGIN_EXAMPLE
+ami_id,elapsed_time
+ami-0123456789abcdef0,180.45
 #+END_EXAMPLE
 
 * Process Flow
@@ -89,8 +102,8 @@ snapshot_number,elapsed_time
    - Detects current instance and root volume
    - Creates EBS snapshot and measures time
    - Records timing to CSV
-2. After all snapshots, copies final snapshot to different region
-3. Creates AMI from copied snapshot
+2. After all snapshots, creates AMI from the last snapshot in the same region
+3. Measures AMI creation time and records to separate CSV file
 
 * Required Permissions
 
@@ -99,9 +112,8 @@ The IAM policy grants:
 - ~ec2:DescribeSnapshots~
 - ~ec2:DescribeInstances~
 - ~ec2:DescribeVolumes~
-- ~ec2:CopySnapshot~
 - ~ec2:RegisterImage~
-- ~ec2:DescribeRegions~
+- ~ec2:DescribeImages~
 
 * Troubleshooting
 
@@ -110,6 +122,3 @@ Ensure IAM role is attached and has required permissions.
 
 ** Metadata Access Issues
 Verify script runs on EC2 instance, not locally.
-
-** Region Availability
-Script automatically selects target region. Ensure account has access to multiple regions.

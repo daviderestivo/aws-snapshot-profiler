@@ -200,7 +200,7 @@ def main():
     parser.add_argument('-n', '--num-snapshots', type=int, default=1, help='Number of snapshots to create (default: 1)')
     parser.add_argument('-o', '--output', default='snapshot_results.csv', help='Output CSV filename (default: snapshot_results.csv)')
     parser.add_argument('-s', '--size', type=int, default=10, help='File size in GB (default: 10)')
-    parser.add_argument('--ami-csv', default='ami_results.csv', help='AMI creation CSV filename (default: ami_results.csv)')
+    parser.add_argument('-a', '--ami-csv', default='ami_results.csv', help='AMI creation CSV filename (default: ami_results.csv)')
     args = parser.parse_args()
 
     try:
