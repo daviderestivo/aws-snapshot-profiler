@@ -29,7 +29,14 @@ def get_instance_metadata():
     ec2 = boto3.client('ec2')
 
     # Get instance ID from metadata
-    instance_id = subprocess.check_output(['curl', '-s', 'http://169.254.169.254/latest/meta-data/instance-id']).decode().strip()
+    try:
+        result = subprocess.run(['curl', '-s', '--connect-timeout', '5', 'http://169.254.169.254/latest/meta-data/instance-id'], 
+                              capture_output=True, text=True, check=True)
+        instance_id = result.stdout.strip()
+        if not instance_id:
+            raise Exception("Empty instance ID returned")
+    except (subprocess.CalledProcessError, Exception) as e:
+        raise Exception(f"Failed to get instance metadata. Ensure script runs on EC2 instance: {e}")
 
     # Get root volume ID
     response = ec2.describe_instances(InstanceIds=[instance_id])
