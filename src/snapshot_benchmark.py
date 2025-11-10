@@ -8,6 +8,11 @@ import argparse
 import random
 from datetime import datetime
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="boto3")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="botocore")
+warnings.filterwarnings("ignore", message=".*Boto3 will no longer support Python.*")
+
 def create_random_file(size_gb):
     """Create file with random content and random name"""
     random_num = random.randint(10000, 99999)

@@ -47,21 +47,23 @@ Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
 
 ** Run Benchmark
 #+BEGIN_SRC bash
-cd src
-# Basic usage (1 snapshot, 10GB file, default CSV name)
-python3 snapshot_benchmark.py
+  export AWS_DEFAULT_REGION=us-east-1
 
-# Create multiple snapshots
-python3 snapshot_benchmark.py -n 5
+  cd src
+  # Basic usage (1 snapshot, 10GB file, default CSV name)
+  python3 snapshot_benchmark.py
 
-# Custom file size (20GB)
-python3 snapshot_benchmark.py -s 20
+  # Create multiple snapshots
+  python3 snapshot_benchmark.py -n 5
 
-# Multiple snapshots with custom size and filename
-python3 snapshot_benchmark.py -n 3 -s 5 -o benchmark_data.csv
+  # Custom file size (20GB)
+  python3 snapshot_benchmark.py -s 20
 
-# Show help
-python3 snapshot_benchmark.py -h
+  # Multiple snapshots with custom size and filename
+  python3 snapshot_benchmark.py -n 3 -s 5 -o benchmark_data.csv
+
+  # Show help
+  python3 snapshot_benchmark.py -h
 #+END_SRC
 
 ** Command Line Options
