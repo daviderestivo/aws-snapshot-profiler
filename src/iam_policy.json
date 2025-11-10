@@ -10,7 +10,8 @@
                 "ec2:DescribeVolumes",
                 "ec2:CopySnapshot",
                 "ec2:RegisterImage",
-                "ec2:DescribeRegions"
+                "ec2:DescribeRegions",
+                "ec2:EnableFastSnapshotRestores"
             ],
             "Resource": "*"
         }
