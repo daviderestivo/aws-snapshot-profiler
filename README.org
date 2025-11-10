@@ -111,6 +111,129 @@ ami-0123456789abcdef0,180.45
 2. After all snapshots, creates AMI from the last snapshot in the same region
 3. Measures AMI creation time and records to separate CSV file
 
+* Test Results
+
+#+begin_src bash
+  $ python3 snapshot_benchmark.py -n 10 -s 10 -o benchmark_data.csv -a ami_times.csv -d /
+#+end_src
+
+=Output=
+
+#+begin_src bash
+  Creating 10GB random file: //aws-snapshot-profiler-33369.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.6678 s, 329 MB/s
+  File //aws-snapshot-profiler-33369.dat created successfully
+  Starting snapshot 1...
+  Fast snapshot restore enabled for snap-003c920777f710c90
+  Snapshot snap-003c920777f710c90 (aws-snapshot-profiler-33369) completed in 106.13 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-51600.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.7921 s, 327 MB/s
+  File //aws-snapshot-profiler-51600.dat created successfully
+  Starting snapshot 2...
+  Fast snapshot restore enabled for snap-0e758f1a9d3b3e14a
+  Snapshot snap-0e758f1a9d3b3e14a (aws-snapshot-profiler-51600) completed in 106.14 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-73145.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.755 s, 328 MB/s
+  File //aws-snapshot-profiler-73145.dat created successfully
+  Starting snapshot 3...
+  Fast snapshot restore enabled for snap-07e6c5b08d9bd8b2b
+  Snapshot snap-07e6c5b08d9bd8b2b (aws-snapshot-profiler-73145) completed in 136.32 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-36563.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.8364 s, 327 MB/s
+  File //aws-snapshot-profiler-36563.dat created successfully
+  Starting snapshot 4...
+  Fast snapshot restore enabled for snap-0b7c86d359bbe5fff
+  Snapshot snap-0b7c86d359bbe5fff (aws-snapshot-profiler-36563) completed in 106.19 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-81152.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.5669 s, 330 MB/s
+  File //aws-snapshot-profiler-81152.dat created successfully
+  Starting snapshot 5...
+  Fast snapshot restore enabled for snap-01497d9af7254e86e
+  Snapshot snap-01497d9af7254e86e (aws-snapshot-profiler-81152) completed in 121.16 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-60823.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.5804 s, 330 MB/s
+  File //aws-snapshot-profiler-60823.dat created successfully
+  Starting snapshot 6...
+  Fast snapshot restore enabled for snap-0de0692e4d30a1d6c
+  Snapshot snap-0de0692e4d30a1d6c (aws-snapshot-profiler-60823) completed in 106.23 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-61880.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.7261 s, 328 MB/s
+  File //aws-snapshot-profiler-61880.dat created successfully
+  Starting snapshot 7...
+  Fast snapshot restore enabled for snap-0ec466b840ba67990
+  Snapshot snap-0ec466b840ba67990 (aws-snapshot-profiler-61880) completed in 122.03 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-97741.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.5514 s, 330 MB/s
+  File //aws-snapshot-profiler-97741.dat created successfully
+  Starting snapshot 8...
+  Fast snapshot restore enabled for snap-017cb318c30b70e2f
+  Snapshot snap-017cb318c30b70e2f (aws-snapshot-profiler-97741) completed in 121.32 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-41545.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.8429 s, 327 MB/s
+  File //aws-snapshot-profiler-41545.dat created successfully
+  Starting snapshot 9...
+  Fast snapshot restore enabled for snap-0b3bee84e646317e6
+  Snapshot snap-0b3bee84e646317e6 (aws-snapshot-profiler-41545) completed in 121.44 seconds
+  Creating 10GB random file: //aws-snapshot-profiler-57462.dat
+  10240+0 records in
+  10240+0 records out
+  10737418240 bytes (11 GB, 10 GiB) copied, 32.655 s, 329 MB/s
+  File //aws-snapshot-profiler-57462.dat created successfully
+  Starting snapshot 10...
+  Fast snapshot restore enabled for snap-0340eb8c1956b51d7
+  Snapshot snap-0340eb8c1956b51d7 (aws-snapshot-profiler-57462) completed in 106.22 seconds
+  Creating AMI from snapshot snap-0340eb8c1956b51d7...
+  AMI ami-0c148563c886a6b73 created in 0.43 seconds
+  AMI created: ami-0c148563c886a6b73
+  Process completed successfully!
+  Created 10 snapshots
+  Snapshot results saved to benchmark_data.csv
+  AMI results saved to ami_times.csv
+#+end_src
+
+=benchmark_data.csv=
+
+#+begin_src csv
+snapshot_number,elapsed_time
+1,106.13461017608643
+2,106.14216232299805
+3,136.32453417778015
+4,106.19395470619202
+5,121.15927529335022
+6,106.23158955574036
+7,122.02734017372131
+8,121.31629538536072
+9,121.43685007095337
+10,106.21552038192749
+#+end_src
+
+=ami_times.csv=
+
+#+begin_src csv
+ami_id,elapsed_time
+ami-0c148563c886a6b73,0.4308910369873047
+#+end_src
+
+[[file:./img/test_results.png]]
+
 * Troubleshooting
 
 ** Permission Errors
