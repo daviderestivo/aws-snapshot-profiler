@@ -1,0 +1,93 @@
+#+TITLE: AWS Snapshot Profiler
+#+AUTHOR: AWS Snapshot Benchmarking Tool
+#+DATE: 2025-11-10
+
+* Purpose
+
+This tool benchmarks AWS EBS snapshot creation performance by:
+- Creating a 10GB random file to simulate disk activity
+- Measuring snapshot creation time
+- Recording results to CSV
+- Copying snapshots across regions and creating AMIs
+
+* Prerequisites
+
+- EC2 instance running Amazon Linux 2 or Ubuntu
+- Python 3.6+
+- AWS CLI configured
+- ~boto3~ Python library
+
+* Installation
+
+** 1. Clone Repository
+#+BEGIN_SRC bash
+git clone <repository-url>
+cd aws-snapshot-profiler
+#+END_SRC
+
+** 2. Install Dependencies
+#+BEGIN_SRC bash
+pip3 install boto3
+#+END_SRC
+
+** 3. Setup IAM Permissions
+#+BEGIN_SRC bash
+cd src
+chmod +x setup_iam.sh
+./setup_iam.sh
+#+END_SRC
+
+** 4. Attach Instance Profile
+Attach the ~EC2SnapshotProfile~ to your EC2 instance via AWS Console:
+- EC2 → Instances → Select Instance → Actions → Security → Modify IAM Role
+- Select ~EC2SnapshotProfile~
+
+* Usage
+
+** Run Benchmark
+#+BEGIN_SRC bash
+cd src
+python3 snapshot_benchmark.py
+#+END_SRC
+
+** Output
+- Console progress updates
+- ~snapshot_results.csv~ with timing data
+- Snapshot ID and AMI ID upon completion
+
+** CSV Format
+#+BEGIN_EXAMPLE
+snapshot_number,elapsed_time
+1,245.67
+#+END_EXAMPLE
+
+* Process Flow
+
+1. Creates ~/tmp/test_file.dat~ (10GB random data)
+2. Detects current instance and root volume
+3. Creates EBS snapshot and measures time
+4. Records timing to CSV
+5. Copies snapshot to different region
+6. Creates AMI from copied snapshot
+
+* Required Permissions
+
+The IAM policy grants:
+- ~ec2:CreateSnapshot~
+- ~ec2:DescribeSnapshots~
+- ~ec2:DescribeInstances~
+- ~ec2:DescribeVolumes~
+- ~ec2:CopySnapshot~
+- ~ec2:RegisterImage~
+- ~ec2:DescribeRegions~
+
+* Troubleshooting
+
+** Permission Errors
+Ensure IAM role is attached and has required permissions.
+
+** Metadata Access Issues
+Verify script runs on EC2 instance, not locally.
+
+** Region Availability
+Script automatically selects target region. Ensure account has access to multiple regions.
