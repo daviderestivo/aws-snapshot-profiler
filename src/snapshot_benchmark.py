@@ -106,7 +106,47 @@ def record_to_csv(snapshot_num, elapsed_time, csv_filename):
             writer.writerow(['snapshot_number', 'elapsed_time'])
         writer.writerow([snapshot_num, elapsed_time])
 
-def copy_snapshot_and_create_ami(snapshot_id, source_region):
+def create_ami_and_measure(snapshot_id, snapshot_name):
+    """Create AMI from snapshot and measure time"""
+    ec2 = boto3.client('ec2')
+    
+    print(f"Creating AMI from snapshot {snapshot_id}...")
+    start_time = time.time()
+    
+    ami_response = ec2.register_image(
+        Name=f'{snapshot_name}-ami-{int(time.time())}',
+        Architecture='x86_64',
+        RootDeviceName='/dev/sda1',
+        BlockDeviceMappings=[{
+            'DeviceName': '/dev/sda1',
+            'Ebs': {
+                'SnapshotId': snapshot_id,
+                'VolumeType': 'gp3'
+            }
+        }]
+    )
+    
+    ami_id = ami_response['ImageId']
+    
+    # Wait for AMI to be available
+    waiter = ec2.get_waiter('image_available')
+    waiter.wait(ImageIds=[ami_id])
+    
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    
+    print(f"AMI {ami_id} created in {elapsed_time:.2f} seconds")
+    return ami_id, elapsed_time
+
+def record_ami_to_csv(ami_id, elapsed_time, csv_filename):
+    """Record AMI creation results to CSV"""
+    file_exists = os.path.exists(csv_filename)
+
+    with open(csv_filename, 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        if not file_exists:
+            writer.writerow(['ami_id', 'elapsed_time'])
+        writer.writerow([ami_id, elapsed_time])
     """Copy snapshot to another AZ and create AMI"""
     try:
         # Get available regions
@@ -160,12 +200,16 @@ def main():
     parser.add_argument('-n', '--num-snapshots', type=int, default=1, help='Number of snapshots to create (default: 1)')
     parser.add_argument('-o', '--output', default='snapshot_results.csv', help='Output CSV filename (default: snapshot_results.csv)')
     parser.add_argument('-s', '--size', type=int, default=10, help='File size in GB (default: 10)')
+    parser.add_argument('--ami-csv', default='ami_results.csv', help='AMI creation CSV filename (default: ami_results.csv)')
     args = parser.parse_args()
 
     try:
         # Get instance info
         instance_id, volume_id = get_instance_metadata()
         current_region = boto3.Session().region_name
+
+        last_snapshot_id = None
+        last_snapshot_name = None
 
         # Create snapshots in loop
         for snapshot_num in range(1, args.num_snapshots + 1):
@@ -174,19 +218,24 @@ def main():
 
             # Step 2 & 3: Create snapshot and measure time
             snapshot_id, elapsed_time = create_snapshot_and_measure(volume_id, snapshot_num, filename)
+            
+            # Store last snapshot info
+            last_snapshot_id = snapshot_id
+            last_snapshot_name = os.path.basename(filename).replace('.dat', '')
 
             # Step 4: Record to CSV
             record_to_csv(snapshot_num, elapsed_time, args.output)
 
-            # Step 5: Copy snapshot and create AMI (only for last snapshot)
-            if snapshot_num == args.num_snapshots:
-                ami_id = copy_snapshot_and_create_ami(snapshot_id, current_region)
-                if ami_id:
-                    print(f"AMI created: {ami_id}")
+        # Step 5: Create AMI from last snapshot
+        if last_snapshot_id:
+            ami_id, ami_elapsed_time = create_ami_and_measure(last_snapshot_id, last_snapshot_name)
+            record_ami_to_csv(ami_id, ami_elapsed_time, args.ami_csv)
+            print(f"AMI created: {ami_id}")
 
         print(f"Process completed successfully!")
         print(f"Created {args.num_snapshots} snapshots")
-        print(f"Results saved to {args.output}")
+        print(f"Snapshot results saved to {args.output}")
+        print(f"AMI results saved to {args.ami_csv}")
 
     except Exception as e:
         print(f"Error: {e}")
